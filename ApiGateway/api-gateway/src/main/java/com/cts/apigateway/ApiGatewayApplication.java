@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 /**
- * @author POD-6 This is the Main Application
+ * @author POD-4 This is the Main Application
  */
 
 @SpringBootApplication
