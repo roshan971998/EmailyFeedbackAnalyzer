@@ -1,0 +1,86 @@
+//Request payload for /addSurveys
+//{
+//	  "Survey_title": "example.com",
+//	  "Survey_body":"abc123",
+//	  "Survey_subject":"abc123",
+//	  "Recipients_list":[
+//	      {
+//	          "email_id":"abc@gmail.com"
+//	      },
+//	      {
+//	          "email_id":"defgh@gmail.com"
+//	      }
+//	  ],
+//	  "Survey_userId":1
+//}
+
+
+
+	@PostMapping("/new")
+	public ResponseEntity<String> addSurvey(@RequestHeader(name = "Authorization") String token,
+			@Valid @RequestBody CreateSurveyRequest createSurveyRequest) {
+		if (authorisationClient.validate(token)) {
+			Survey survey = surveyService.addSurvey(createSurveyRequest);
+			if (survey != null) {
+				log.info("survey is =" + survey.toString());
+//				String response = mailClient.sendMail(token, new CreateMailRequest(survey));
+//				if (response.getBody().equals("Mails sent successfully")) {
+				log.info("Mails sent successfully");
+				return new ResponseEntity<String>("Survey Saved", HttpStatus.CREATED);
+//				}
+				// return new ResponseEntity<String>("sending Mails Failed !!!",
+				// HttpStatus.FORBIDDEN);
+			} else
+				return new ResponseEntity<String>("Survey Not Saved,Try Again!", HttpStatus.FORBIDDEN);
+		} else {
+			log.debug("Token validation Failed!!");
+			return new ResponseEntity<>("Unauthorized to perform the action", HttpStatus.UNAUTHORIZED);
+		}
+	}
+	
+	
+		@GetMapping("/surveys/{uID}")
+	public ResponseEntity<List<SurveyResponse>> getUserSurveys(@RequestHeader(name = "Authorization") String token,
+			@PathVariable("uID") Integer uID) throws UserNotFoundException {
+		if (authorisationClient.validate(token)) {
+			List<Survey> surveyList = surveyService.getUserSurveys(uID);
+			List<SurveyResponse> surveyResponseList = new ArrayList<>();
+			if (!surveyList.isEmpty()) {
+				log.info("Total Surveys found is =" + surveyList.size());
+				surveyList.stream().forEach(survey -> {
+					surveyResponseList.add(new SurveyResponse(survey));
+				});
+			} else {
+				log.debug("No such user exist!!");
+				throw new UserNotFoundException("User not found for userID : " + uID);
+			}
+			return new ResponseEntity<List<SurveyResponse>>(surveyResponseList, HttpStatus.FOUND);
+		} else {
+			log.debug("Token validation Failed!!");
+			return new ResponseEntity<List<SurveyResponse>>(new ArrayList<>(), HttpStatus.UNAUTHORIZED);
+		}
+	}
+	
+	
+	
+	@DeleteMapping("/surveys/{uId}/{sId}")
+	public ResponseEntity<String> removeSurvey(@RequestHeader(name = "Authorization") String token,
+			@PathVariable("uId") int userId, @PathVariable("sId") int surveyId) throws UnAuthorizedOperationRequest {
+		ResponseEntity<String> responseEntity;
+		if (authorisationClient.validate(token)) {
+			Survey survey = null;
+			survey = surveyService.deleteSurvey(userId, surveyId);
+			if (survey != null)
+				log.info("Survey deleted successfully");
+			responseEntity = new ResponseEntity<>("Survey deleted successfully", HttpStatus.CREATED);
+		} else {
+			log.debug("Token validation Failed!!");
+			responseEntity = new ResponseEntity<>("Invalid Token,Unauthorized to perform the action!",
+					HttpStatus.UNAUTHORIZED);
+		}
+//		if(responseEntity) {
+//		log.debug("Operation Unsuccessfull");
+//		responseEntity= new ResponseEntity<String>("Survey Not deleted,Try Again!", HttpStatus.INTERNAL_SERVER_ERROR);
+//		}
+		return responseEntity;
+	}

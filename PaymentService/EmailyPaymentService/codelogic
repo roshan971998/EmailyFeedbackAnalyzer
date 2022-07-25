@@ -1,0 +1,20 @@
+Request Payload
+{
+    "amount":499,
+    "info":"order_info"
+}
+order returned by  razorpayClient.orders.create(options);
+{
+"amount":49900,
+"amount_paid":0,
+"notes":[],
+"created_at":1656965318,
+"amount_due":49900,
+"currency":"INR",
+"receipt":"txn_123456",
+"id":"order_JpPoqx671qir8U",
+"entity":"order",
+"offer_id":null,
+"status":"created",
+"attempts":0
+}
