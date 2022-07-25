@@ -1,0 +1,4 @@
+.tabs .tab:hover {
+  cursor: pointer;
+  background: #508adb;
+}
